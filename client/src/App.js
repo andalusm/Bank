@@ -1,21 +1,60 @@
 import logo from './logo.svg';
-import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import './App.css';
 import Navbar from './components/Navbar';
+import Transactions from './components/Transactions';
+import Operations from './components/Operations'
+import BreakDown from './components/BreakDown'
 import { useState, useEffect } from 'react';
-import Transactions from './components/Transactions'
+import SignIn from './components/SignIn';
+import SignUp from './components/SignUp';
 import { createTheme, ThemeProvider } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
-import Operations from './components/Operations';
-import axios from 'axios';
-import BreakDown from './components/BreakDown';
-
-
+import axios from 'axios'
 
 
 
 
 function App() {
+  const [balance, setBalance] = useState(0)
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [transactions, setTransactions] = useState([])
+  function getData() {
+    axios.get("/api/transactions/" + localStorage.id, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    }).then((res) => {
+      setTransactions(res.data)
+    });
+  };
+
+  useEffect(() => {
+    if (localStorage.token) {
+      setLoggedIn(true)
+      getData()
+      setBalance(localStorage.balance)
+    }
+    else {
+      console.log("Ho")
+    }
+  }
+    , []);
+  const logout = function () {
+    localStorage.clear()
+    setLoggedIn(false)
+    setTransactions([])
+  }
+  const login = function(){
+    setLoggedIn(true)
+    getData()
+  }
+  function canPay(balanceChange) {
+    if (balance + balanceChange <= 500) {
+      return false
+    }
+    return true
+  }
   const theme = createTheme({
     palette: {
       primary: {
@@ -27,43 +66,30 @@ function App() {
       },
     },
   })
-  const [balance, setBalance] = useState(90)
-  const [transactions,setTransactions] = useState([])
-  function getData() {
-    axios.get("/api").then((res ) => {
-      setTransactions(res.data)
-    });
-  };
-  useEffect(() => {getData()}
-  , []);
-  function changeBalance(balanceChange){
-    setBalance(balance+balanceChange)
-  }
-  function canPay(balanceChange){
-    if(balance+balanceChange < -500){
-      return false
-    }
-    return true
+  function changeBalance(newBalance) {
+    localStorage.balance = Number(newBalance)
+    setBalance(newBalance)
   }
 
 
-  
-  
   return (
-    <Router>
-      <ThemeProvider theme={theme}>
-      <CssBaseline />
-        <Navbar balance={balance}></Navbar>
-
-        <Routes>
-          <Route path="/" element={<Transactions transactions={transactions} update={getData} />} />
-         <Route path="/operations" element={<Operations changeBalance={changeBalance} canPay={canPay}/>} />
-         <Route path="/breakdown" element={<BreakDown />} />
-
-        </Routes>
+    <>
+      <Router>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          {loggedIn ? <Navbar balance={balance} logout={logout}></Navbar> : <></>}
+          <Routes>
+            <Route path="/" element={<Transactions changeBalance={changeBalance} transactions={transactions} update={getData} />} />
+            <Route path="/signUp" element={<SignUp loggedIn={loggedIn} loggedInF={login}/>} />
+            <Route path="/signIn" element={<SignIn loggedIn={loggedIn} loggedInF={login} />} />
+            <Route path="/operations" element={<Operations changeBalance={changeBalance} canPay={canPay} />} />
+            <Route path="/breakdown" element={<BreakDown />} />
+          </Routes>
         </ThemeProvider>
-    </Router>
-  );
+      </Router>
+    </>
+  )
+
 }
 
 export default App;

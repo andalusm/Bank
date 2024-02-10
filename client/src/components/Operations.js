@@ -9,6 +9,7 @@ export default function Operations({ changeBalance, canPay }) {
   const [amount, setAmount] = useState(0);
   const [vendor, setVendor] = useState("");
   const [category, setCategory] = useState("");
+  const [date, setDate] = useState((new Date()).toISOString().split('T')[0]);
   const [open, setOpen] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("The transaction wasn't added try again later")
@@ -28,32 +29,36 @@ export default function Operations({ changeBalance, canPay }) {
 
 
   function addTransaction(alpha) {
-   if(category && vendor && amount && canPay(alpha * amount)){
-    axios.post('/api', {
-      "amount": (alpha * amount),
-      "vendor": vendor,
-      "category": category
-    }).then(res => {
-      changeBalance(alpha * amount)
-      setSuccess(true)
-      handleClick()
-    })
-      .catch(error => {
+    if (date && category && vendor && amount && (alpha > 0 || canPay(alpha * amount))) {
+      axios.post('/api/transactions/' + localStorage.id, {
+        "amount": (alpha * amount),
+        "vendor": vendor,
+        "category": category,
+        "date": date
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.token}`
+        }
+      }).then(res => {
+        changeBalance(res.data.balance)
+        setSuccess(true)
+        handleClick()
+      })
+        .catch(error => {
+          setSuccess(false)
+          handleClick()
+        })
+    }
+    else {
+      if (!canPay(alpha * amount)) {
+        setErrorMessage("Insufficient Funds!!! Your balance can't go lower that -500!")
         setSuccess(false)
         handleClick()
-        console.log(error)
-      })
-    }
-    else{
-      if(amount){
-      setErrorMessage("Insufficient Funds!!! Your balance can't go lower that -500!")
-      setSuccess(false)
-      handleClick()
       }
-      else{
+      else {
         setErrorMessage("Some Inputs are empty or the amount is 0!")
-      setSuccess(false)
-      handleClick()
+        setSuccess(false)
+        handleClick()
       }
     }
   }
@@ -73,6 +78,13 @@ export default function Operations({ changeBalance, canPay }) {
         <div><TextField sx={{
           "width": "50%"
         }} onChange={(e) => setCategory(e.target.value)} value={category} variant="outlined" label="Transaction category" color="secondary" /></div>
+        <div>
+          <TextField sx={{
+            "width": "50%"
+          }} color='secondary' variant="outlined" onChange={(e) => {
+            setDate(e.target.value)
+          }} value={date} label="date" type="date" />
+        </div>
         <div>
           <Button onClick={() => addTransaction(-1)} color="error" variant="contained" disableElevation>
             Withdraw

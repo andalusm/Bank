@@ -37,7 +37,7 @@
   }
 }
 .transactions{
-  width: 50%;
+  width: 70%;
   margin: 20px;
 }
 .breakdown{
@@ -65,10 +65,10 @@
 }
 
 .green{
-  color: green;
+  color: green !important;
 }
 .red{
-  color: red;
+  color: red !important;
 }
 .withdraw{
   color: darkred;
