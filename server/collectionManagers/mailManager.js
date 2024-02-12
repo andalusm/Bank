@@ -22,8 +22,8 @@ class mailManager {
         const mailOptions = {
             from: "andalusmh2002@gmail.com",
             to: userEmail,
-            subject: "Hello from Nodemailer",
-            text: "This is a test email sent using Nodemailer.",
+            subject: "Hello from Bank",
+            text: "Thank you for registering to Bank please enjoy!",
         };
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {

@@ -10,7 +10,8 @@ import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import { createTheme, ThemeProvider } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
-import axios from 'axios'
+import { SnackbarProvider} from 'notistack';
+
 
 
 
@@ -18,36 +19,20 @@ import axios from 'axios'
 function App() {
   const [balance, setBalance] = useState(0)
   const [loggedIn, setLoggedIn] = useState(false)
-  const [transactions, setTransactions] = useState([])
-  function getData() {
-    axios.get("/api/transactions/" + localStorage.id, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    }).then((res) => {
-      setTransactions(res.data)
-    });
-  };
 
   useEffect(() => {
     if (localStorage.token) {
       setLoggedIn(true)
-      getData()
       setBalance(localStorage.balance)
     }
-    else {
-      console.log("Ho")
-    }
-  }
-    , []);
+  })
+
   const logout = function () {
     localStorage.clear()
     setLoggedIn(false)
-    setTransactions([])
   }
-  const login = function(){
+  const login = function () {
     setLoggedIn(true)
-    getData()
   }
   function canPay(balanceChange) {
     if (balance + balanceChange <= 500) {
@@ -74,19 +59,21 @@ function App() {
 
   return (
     <>
-      <Router>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          {loggedIn ? <Navbar balance={balance} logout={logout}></Navbar> : <></>}
-          <Routes>
-            <Route path="/" element={<Transactions changeBalance={changeBalance} transactions={transactions} update={getData} />} />
-            <Route path="/signUp" element={<SignUp loggedIn={loggedIn} loggedInF={login}/>} />
-            <Route path="/signIn" element={<SignIn loggedIn={loggedIn} loggedInF={login} />} />
-            <Route path="/operations" element={<Operations changeBalance={changeBalance} canPay={canPay} />} />
-            <Route path="/breakdown" element={<BreakDown />} />
-          </Routes>
-        </ThemeProvider>
-      </Router>
+      <SnackbarProvider>
+        <Router>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            {loggedIn ? <Navbar balance={balance} logout={logout}></Navbar> : <></>}
+            <Routes>
+              <Route path="/" element={<Transactions changeBalance={changeBalance} />} />
+              <Route path="/signUp" element={<SignUp loggedIn={loggedIn} loggedInF={login} />} />
+              <Route path="/signIn" element={<SignIn loggedIn={loggedIn} loggedInF={login} />} />
+              <Route path="/operations" element={<Operations changeBalance={changeBalance} canPay={canPay} />} />
+              <Route path="/breakdown" element={<BreakDown />} />
+            </Routes>
+          </ThemeProvider>
+        </Router>
+      </SnackbarProvider>
     </>
   )
 

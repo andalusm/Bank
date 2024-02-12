@@ -33,7 +33,7 @@ class transactionManager {
             return { success: true, message: "Transaction removed successfully", balance }
         }
         else {
-            return { success: false, error: "Transaction not found" }
+            return { success: false, message: "Transaction not found" }
         }
     }
     static async addTransaction(transaction) {
@@ -83,6 +83,7 @@ class transactionManager {
     static async regenerate() {
         const today = new Date().toISOString().split('T')[0];
         await Transaction.deleteMany({})
+        await userManager.restartUser("65c6926f0ba4fac58de1a4e1")
         for (const t of TransactionJson) {
 
             await transactionManager.addTransaction({ ...t, date: today, user:"65c6926f0ba4fac58de1a4e1" })

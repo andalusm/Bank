@@ -14,6 +14,7 @@ function hashPassword (user){
 
 async function authenticateUser(email, password) {
   const user = await userManager.findUserByMail(email);
+  console.log(user)
   if (!user) {
     return null;
   }

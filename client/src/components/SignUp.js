@@ -10,12 +10,29 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import axios from 'axios';
-import  { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { useState } from 'react';
+import { Alert, Snackbar } from '@mui/material';
 
 
 
 
-export default function SignUp({loggedInF, loggedIn}) {
+export default function SignUp({ loggedInF, loggedIn }) {
+  const [open, setOpen] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("The transaction wasn't added try again later")
+
+  const handleClick = () => {
+    setOpen(true);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
   const navigate = useNavigate()
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -26,19 +43,26 @@ export default function SignUp({loggedInF, loggedIn}) {
       "firstName": data.get('firstName'),
       "lastName": data.get('lastName')
     }
-    axios.post('/api/users/register',registerData).then(res => {
+    axios.post('/api/users/register', registerData).then(res => {
       localStorage.setItem('token', res.data.accessToken);
       localStorage.setItem('balance', res.data.balance)
       localStorage.setItem('id', res.data.id)
       localStorage.setItem('name', res.data.name)
       loggedInF(true)
-      return navigate('/')    
-    }).catch(error=>alert("failed to register"))
+      setSuccess(true)
+      handleClick()
+      return navigate('/')
+    }).catch(error => {
+      setSuccess(false)
+      handleClick()
+      console.log(error.message)
+      setErrorMessage(error.message)
+    })
 
   };
-  React.useEffect(()=>{
-    if(loggedIn){
-      return navigate('/') 
+  React.useEffect(() => {
+    if (loggedIn) {
+      return navigate('/')
     }
   })
 
@@ -61,27 +85,27 @@ export default function SignUp({loggedInF, loggedIn}) {
         </Typography>
         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField color="secondary"
-                  autoComplete="given-name"
-                  name="firstName"
-                  required
-                  fullWidth
-                  id="firstName"
-                  label="First Name"
-                  autoFocus
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField color="secondary"
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
-                />
-              </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField color="secondary"
+                autoComplete="given-name"
+                name="firstName"
+                required
+                fullWidth
+                id="firstName"
+                label="First Name"
+                autoFocus
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField color="secondary"
+                required
+                fullWidth
+                id="lastName"
+                label="Last Name"
+                name="lastName"
+                autoComplete="family-name"
+              />
+            </Grid>
             <Grid item xs={12}>
               <TextField color="secondary"
                 required
@@ -122,6 +146,24 @@ export default function SignUp({loggedInF, loggedIn}) {
           </Grid>
         </Box>
       </Box>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        {!success ?
+          <Alert
+            onClose={handleClose}
+            severity="error"
+            sx={{ width: '100%' }}
+          >
+            {errorMessage}
+          </Alert> :
+          <Alert
+            onClose={handleClose}
+            severity="success"
+            sx={{ width: '100%' }}
+          >
+            The transaction was successfully added!
+          </Alert>
+        }
+      </Snackbar>
     </Container>
   );
 }

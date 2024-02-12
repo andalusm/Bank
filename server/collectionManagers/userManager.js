@@ -12,15 +12,22 @@ class userManager {
         mailManager.sendEmail(user.email)
         return newUser
     }
-    static async changeBalance(userID, changedBalance){
+    static async changeBalance(userID, changedBalance) {
         const user = await User.findByIdAndUpdate(userID,
-            {$inc : {balance : changedBalance}}
-            ,{
-            new: true
-          })
+            { $inc: { balance: changedBalance } }
+            , {
+                new: true
+            })
 
         return user.balance
 
+    }
+    static async restartUser(userID) {
+        const user = await User.findByIdAndUpdate(userID,
+           { balance: 0 }
+            , {
+                new: true
+            })
     }
 
 }

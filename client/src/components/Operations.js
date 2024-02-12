@@ -3,6 +3,8 @@ import { TextField, Button, InputAdornment, Alert, Snackbar } from '@mui/materia
 import axios from 'axios';
 import { useState } from 'react';
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
+
 
 
 export default function Operations({ changeBalance, canPay }) {
@@ -13,6 +15,7 @@ export default function Operations({ changeBalance, canPay }) {
   const [open, setOpen] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("The transaction wasn't added try again later")
+  const navigate = useNavigate()
 
   const handleClick = () => {
     setOpen(true);
@@ -43,10 +46,14 @@ export default function Operations({ changeBalance, canPay }) {
         changeBalance(res.data.balance)
         setSuccess(true)
         handleClick()
+        setTimeout(() => {
+          navigate('/')
+        }, 3000)
       })
         .catch(error => {
           setSuccess(false)
           handleClick()
+          setErrorMessage(error.message)
         })
     }
     else {
@@ -100,7 +107,6 @@ export default function Operations({ changeBalance, canPay }) {
           <Alert
             onClose={handleClose}
             severity="error"
-            variant="filled"
             sx={{ width: '100%' }}
           >
             {errorMessage}
@@ -108,7 +114,6 @@ export default function Operations({ changeBalance, canPay }) {
           <Alert
             onClose={handleClose}
             severity="success"
-            variant="filled"
             sx={{ width: '100%' }}
           >
             The transaction was successfully added!

@@ -1,12 +1,29 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Transaction from './Transaction'
 import Item from './Item';
 import { StyledTableCell } from './Table';
 import { TableBody, TableHead, TableRow, Table, Select, MenuItem, InputLabel, FormControl, Autocomplete, TextField, Grid, Box } from '@mui/material';
+import axios from 'axios'
 
-
-export default function Transactions({ transactions, update, changeBalance }) {
+export default function Transactions({ changeBalance }) {
   const [month, setMonth] = useState(-1)
+  const [transactions, setTransactions] = useState([])
+  function update() {
+    axios.get("/api/transactions/" + localStorage.id, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    }).then((res) => {
+      setTransactions(res.data)
+    });
+  };
+
+  useEffect(() => {
+    if (localStorage.token) {
+      update()
+    }
+  }
+    , []);
   const handleChange = (event) => {
     setMonth(event.target.value);
   };

@@ -10,7 +10,7 @@ router.get('/regenerate',async function(req,res){
         res.send(result)
     }
     catch (error) {
-        res.status(400).send(error)
+        res.status(400).send({ message: error.message })
     }
 })
 
@@ -23,7 +23,7 @@ router.get('/category/:categoryName/:userID',Utilities.authenticateToken,async f
         res.send(result)
     }
     catch (error) {
-        res.status(400).send(error)
+        res.status(400).send({ message: error.message })
     }
 
 })
@@ -35,7 +35,7 @@ router.get('/categories/:month/:userID',Utilities.authenticateToken, async funct
         res.send(sumCategory)
     }
     catch (error) {
-        res.status(400).send(error)
+        res.status(400).send({ message: error.message })
     }
 })
 router.get('/categories/:userID',Utilities.authenticateToken, async function(req, res) {
@@ -45,8 +45,7 @@ router.get('/categories/:userID',Utilities.authenticateToken, async function(req
         res.send(sumCategory)
     }
     catch (error) {
-        console.log(error.message)
-        res.status(400).send(error)
+        res.status(400).send({ message: error.message })
     }
 })
 router.delete('/:transactionID',Utilities.authenticateToken, async function(req, res) {
@@ -56,7 +55,7 @@ router.delete('/:transactionID',Utilities.authenticateToken, async function(req,
         res.send(resultDelete)
     }
     catch (error) {
-        res.status(400).send(error)
+        res.status(400).send({ message: error.message })
     }
 })
 
@@ -68,7 +67,7 @@ router.get('/:userID',Utilities.authenticateToken, async function(req, res) {
         res.send(transactions)
     }
     catch (error) {
-        res.status(400).send(error)
+        res.status(400).send({ message: error.message })
     }
 })
 
@@ -80,7 +79,7 @@ router.post('/:userID', Utilities.authenticateToken, async function(req, res) {
         res.send({balance:newTransaction.balance})
     }
     catch (error) {
-        res.status(400).send(error)
+        res.status(400).send({ message: error.message })
     }
 })
 
