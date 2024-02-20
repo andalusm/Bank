@@ -4,9 +4,12 @@ import Item from './Item';
 import { StyledTableCell } from './Table';
 import { TableBody, TableHead, TableRow, Table, Select, MenuItem, InputLabel, FormControl, Autocomplete, TextField, Grid, Box } from '@mui/material';
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
+
 
 export default function Transactions({ changeBalance }) {
   const [month, setMonth] = useState(-1)
+  const navigate = useNavigate()
   const [transactions, setTransactions] = useState([])
   function update() {
     axios.get("/api/transactions/" + localStorage.id, {
@@ -21,6 +24,9 @@ export default function Transactions({ changeBalance }) {
   useEffect(() => {
     if (localStorage.token) {
       update()
+    }
+    else{
+      navigate('/signIn')
     }
   }
     , []);
@@ -97,6 +103,7 @@ export default function Transactions({ changeBalance }) {
               <StyledTableCell >Amount</StyledTableCell>
               <StyledTableCell >Category</StyledTableCell>
               <StyledTableCell >Date of transaction</StyledTableCell>
+              <StyledTableCell ></StyledTableCell>
               <StyledTableCell ></StyledTableCell>
             </TableRow>
           </TableHead>

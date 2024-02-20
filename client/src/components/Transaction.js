@@ -1,33 +1,44 @@
-import React, { Fragment } from 'react'
-import { Grid, Button } from '@mui/material';
-import Item from './Item';
+import React from 'react'
+import { Button } from '@mui/material';
 import axios from 'axios';
 import { StyledTableCell, StyledTableRow } from './Table';
-import { useState } from 'react';
 import { useSnackbar } from 'notistack';
 
 
 export default function Transaction({ transaction, update, changeBalance }) {
-  const [open, setOpen] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const { enqueueSnackbar } = useSnackbar();
+
+
 
   const handleClickVariant = function(text, typeMessage) {
     // variant could be success, error, warning, info, or default
     enqueueSnackbar(text ,  { variant: typeMessage } );
   };
-
-
-  const handleClick = () => {
-    setOpen(true)
-  };
-
-  const handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
+  function addTransaction(date, category, amount, vendor) {
+    if (date && category && vendor && amount ) {
+      axios.post('/api/transactions/' + localStorage.id, {
+        "amount": (amount),
+        "vendor": vendor,
+        "category": category,
+        "date": date
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.token}`
+        }
+      }).then(res => {
+        changeBalance(res.data.balance)
+        update()
+        
+      })
+        .catch(error => {
+          alert(error.message)
+        })
     }
-    setOpen(false);
-  };
+    
+  }
+
+
+
   function deleteTransaction(transactionID) {
     axios.delete('/api/transactions/' + transactionID, {
       headers: {
@@ -36,13 +47,9 @@ export default function Transaction({ transaction, update, changeBalance }) {
     }).then(res => {
       update();
       changeBalance(res.data.balance)
-      setSuccess(true)
-      handleClick()
       handleClickVariant(res.data.message, 'success')
       
     }).catch(error => {
-      setSuccess(false)
-      handleClick()
       handleClickVariant(error.message, 'error')
     })
 
@@ -59,49 +66,10 @@ export default function Transaction({ transaction, update, changeBalance }) {
         <StyledTableCell > <Button color="error" variant="contained" disableElevation onClick={() => deleteTransaction(transaction._id)}>
           Delete
         </Button></StyledTableCell>
+        <StyledTableCell > <Button color="success" variant="contained" disableElevation onClick={() => addTransaction(transaction.date, transaction.category, transaction.amount, transaction.vendor)}>
+          Repeat
+        </Button></StyledTableCell>
       </StyledTableRow>
-
-      {/* <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-        {!success ?
-          <Alert
-            onClose={handleClose}
-            severity="error"
-            sx={{ width: '100%' }}
-          >
-            {snackbarMessage}
-          </Alert> :
-          <Alert
-            onClose={handleClose}
-            severity="success"
-            sx={{ width: '100%' }}
-          >
-            {snackbarMessage}
-          </Alert>
-        }
-      </Snackbar> */}
-
-      {/* <br></br>
-      <Item  sx={{ flexGrow: 1 }}>
-      <Grid container spacing={2}>
-      <Grid  item xs={12}>
-      <h3>{new Date(transaction.date).toLocaleDateString('en-DE')}</h3>
-        </Grid>
-        <Grid  item xs={6}>
-        <div style={{backgroundColor:"#F2FEFF"}} >{transaction.vendor}</div>
-        </Grid>
-        <Grid item xs={6}>
-        <div className={transaction.amount>=0?"deposit" :"withdraw"}>{transaction.amount}$</div>               
-        </Grid>
-        <Grid item xs={6}>
-        <div>{transaction.category}</div> 
-        </Grid>
-        <Grid item xs={6}>
-        <Button color="error" variant="contained" disableElevation onClick={()=>deleteTransaction(transaction._id)}>
-          Delete
-        </Button>
-        </Grid>
-        </Grid>
-      </Item> */}
     </>
   )
 }
